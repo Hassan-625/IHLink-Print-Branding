@@ -1,0 +1,6 @@
+import { Navigate,Route,Routes } from "react-router-dom";
+import { PrintBrandingHome } from "@/pages/print/PrintBrandingHome";
+import { PrintWorkspace } from "@/pages/print/PrintWorkspace";
+import { PrintOperations } from "@/pages/print/PrintOperations";
+import { PrintSignIn } from "@/pages/print/PrintSignIn";
+export default function App(){return <Routes><Route path="/" element={<PrintBrandingHome/>}/><Route path="/print" element={<PrintBrandingHome/>}/><Route path="/print/order" element={<PrintWorkspace/>}/><Route path="/print/dashboard" element={<PrintWorkspace/>}/><Route path="/print/orders" element={<PrintWorkspace/>}/><Route path="/print/proofs" element={<PrintWorkspace/>}/><Route path="/print/invoices" element={<PrintWorkspace/>}/><Route path="/print/notifications" element={<PrintWorkspace/>}/><Route path="/print/support" element={<PrintWorkspace/>}/><Route path="/print/operations" element={<PrintOperations/>}/><Route path="/print/manage" element={<PrintOperations/>}/><Route path="/signin" element={<PrintSignIn/>}/><Route path="*" element={<Navigate to="/print" replace/>}/></Routes>}
