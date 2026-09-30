@@ -2,19 +2,19 @@ import {createContext,useContext,useEffect,useState,type ReactNode} from 'react'
 import {Link,Navigate,Outlet,useLocation} from 'react-router-dom';
 import {useAuth} from '@/context/AuthContext';
 import {supabase} from '@/lib/supabase';
-type Access={userId:string;loading:boolean;view:boolean;edit:boolean;error:string|null;active:boolean};
-const empty:Access={userId:'',loading:true,view:false,edit:false,error:null,active:false};
+type Access={userId:string;loading:boolean;view:boolean;edit:boolean;error:string|null;active:boolean;customer:boolean};
+const empty:Access={userId:'',loading:true,view:false,edit:false,error:null,active:false,customer:false};
 const Context=createContext<Access>(empty);
 export function PrintAccessProvider({children}:{children:ReactNode}){
  const {user,loading}=useAuth();const [access,setAccess]=useState<Access>(empty);
  useEffect(()=>{let current=true;setAccess({...empty,userId:user?.id||'',loading});
   if(loading||!user)return;
   setAccess({...empty,userId:user.id});
-  void Promise.all([supabase.from('profiles').select('role,status').eq('id',user.id).maybeSingle(),supabase.from('admin_product_access').select('can_view,can_edit,can_manage').eq('user_id',user.id).eq('product','print').maybeSingle()]).then(([profile,grant])=>{
-   if(!current)return;const error=profile.error?.message||grant.error?.message||null;
+  void Promise.all([supabase.from('profiles').select('role,status').eq('id',user.id).maybeSingle(),supabase.from('admin_product_access').select('can_view,can_edit,can_manage').eq('user_id',user.id).eq('product','print').maybeSingle(),supabase.from('customer_service_access').select('status').eq('user_id',user.id).eq('product','print').maybeSingle()]).then(([profile,grant,service])=>{
+   if(!current)return;const error=profile.error?.message||grant.error?.message||service.error?.message||null;
    const active=profile.data?.status==='active';const admin=active&&profile.data?.role==='super_admin';
    const staff=active&&['platform_admin','support','finance'].includes(profile.data?.role||'');
-   setAccess({userId:user.id,loading:false,active,error,view:!error&&(admin||staff&&Boolean(grant.data?.can_view)),edit:!error&&(admin||staff&&Boolean(grant.data?.can_edit||grant.data?.can_manage))});
+   setAccess({userId:user.id,loading:false,active,error,customer:!error&&active&&service.data?.status==='active',view:!error&&(admin||staff&&Boolean(grant.data?.can_view)),edit:!error&&(admin||staff&&Boolean(grant.data?.can_edit||grant.data?.can_manage))});
   }).catch(()=>{if(current)setAccess({...empty,userId:user.id,loading:false,error:'Print permissions could not be loaded.'})});
   return()=>{current=false};
  },[user?.id,loading]);
@@ -26,7 +26,7 @@ export function PrintRouteGate({staff=false,edit=false}:{staff?:boolean;edit?:bo
  if(loading||user&&access.loading)return <p role="status" className="p-8">Checking your Print workspace access…</p>;
  if(!user)return <Navigate to={'/signin?next='+encodeURIComponent(location.pathname+location.search)} replace state={{from:location.pathname+location.search}}/>;
  if(access.error)return <p role="alert" className="p-8 text-red-700">{access.error}</p>;
- if(!access.active||staff&&!(edit?access.edit:access.view))return <section className="p-8"><h1 className="text-2xl font-bold">Access restricted</h1><p className="mt-3">Your account does not have permission to open this Print workspace.</p><Link className="mt-4 inline-block underline" to="/print">Return to Print & Branding</Link></section>;
+ if(!access.active||!access.customer&&!access.view||staff&&!(edit?access.edit:access.view))return <section className="p-8"><h1 className="text-2xl font-bold">Access restricted</h1><p className="mt-3">Your account does not have permission to open this Print workspace.</p><Link className="mt-4 inline-block underline" to="/print">Return to Print & Branding</Link></section>;
  return <Outlet/>;
 }
 const customerLinks=[['Dashboard','/print/dashboard'],['Place an order / request quote','/print/order'],['My orders','/print/orders'],['My proofs','/print/proofs'],['My invoices','/print/invoices'],['My payments','/print/payments'],['Notifications','/print/notifications'],['Support','/print/get-in-touch']];
