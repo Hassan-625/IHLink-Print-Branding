@@ -1,4 +1,5 @@
--- Run after the migration in the SAME transaction. This script always rolls back.
+-- Run after the migration. The explicit transaction keeps every fixture temporary.
+begin;
 insert into auth.users(id,email,raw_user_meta_data) values
 ('d690a16b-0091-4b8e-a22c-e5beedb4dced','workflow-editor@example.invalid','{"requested_service":"print"}'),
 ('9ec4356a-e4f5-40f1-b263-745609f63891','workflow-customer@example.invalid','{"requested_service":"print"}'),
