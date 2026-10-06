@@ -137,9 +137,9 @@ interface HeaderProps {
 export function Header({ product = 'corporate', showAnnouncement = true, announcementText }: HeaderProps) {
   const theme = productThemes[product];
   const managedNav = useManagedNavigation(product, 'header');
-  const nav = managedNav.length ? managedNav.filter(x=>!x.parent_id).map(x=>({label:x.label,href:x.href,children:managedNav.filter(y=>y.parent_id===x.id).map(y=>({label:y.label,href:y.href}))})) : productNavs[product];
+  const nav: NavItem[] = managedNav.length ? managedNav.filter(x=>!x.parent_id).map(x=>({label:x.label,href:x.href,children:managedNav.filter(y=>y.parent_id===x.id).map(y=>({label:y.label,href:y.href}))})) : productNavs[product];
   const location = useLocation();
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openDivision, setOpenDivision] = useState<string | null>(null);
 
@@ -246,7 +246,7 @@ export function Header({ product = 'corporate', showAnnouncement = true, announc
                 )}
               </Dropdown>}
 
-              {user ? <><Link to="/account" className="hidden xl:flex items-center whitespace-nowrap"><Button variant="ghost" size="md">My Dashboard</Button></Link>{profile?.role==="super_admin"&&<Link to="/admin" className="hidden xl:flex items-center whitespace-nowrap"><Button size="md" themeClass={theme.btnClass}>Super Admin</Button></Link>}</> : <><Link to="/signin" className="hidden xl:flex items-center whitespace-nowrap"><Button variant="ghost" size="md">Sign In</Button></Link><Link to="/register" className="hidden xl:flex items-center whitespace-nowrap"><Button size="md" themeClass={theme.btnClass}>Get Started</Button></Link></>}
+              {user ? <><Link to="/account" className="hidden xl:flex items-center whitespace-nowrap"><Button variant="ghost" size="md">My Dashboard</Button></Link></> : <><Link to="/signin" className="hidden xl:flex items-center whitespace-nowrap"><Button variant="ghost" size="md">Sign In</Button></Link><Link to="/register" className="hidden xl:flex items-center whitespace-nowrap"><Button size="md" themeClass={theme.btnClass}>Get Started</Button></Link></>}
 
               <button className="xl:hidden p-2 rounded-lg hover:bg-gray-100" onClick={() => setMobileOpen(!mobileOpen)}>
                 {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -267,7 +267,7 @@ export function Header({ product = 'corporate', showAnnouncement = true, announc
                 {item.label}
               </Link>
             ))}
-            <div className="pt-3 border-t border-border flex gap-2">{user ? <><Link to="/account" className="flex-1"><Button variant="secondary" fullWidth>My Dashboard</Button></Link>{profile?.role==="super_admin"&&<Link to="/admin" className="flex-1"><Button fullWidth themeClass={theme.btnClass}>Super Admin</Button></Link>}</> : <><Link to="/signin" className="flex-1"><Button variant="secondary" fullWidth>Sign In</Button></Link><Link to="/register" className="flex-1"><Button fullWidth themeClass={theme.btnClass}>Get Started</Button></Link></>}</div>
+            <div className="pt-3 border-t border-border flex gap-2">{user ? <><Link to="/account" className="flex-1"><Button variant="secondary" fullWidth>My Dashboard</Button></Link></> : <><Link to="/signin" className="flex-1"><Button variant="secondary" fullWidth>Sign In</Button></Link><Link to="/register" className="flex-1"><Button fullWidth themeClass={theme.btnClass}>Get Started</Button></Link></>}</div>
           </div>
         )}
       </header>
