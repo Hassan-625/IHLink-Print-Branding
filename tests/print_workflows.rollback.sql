@@ -15,7 +15,7 @@ select public.print_issue_quote('6da07f10-3ac0-49df-a3ee-64650a8e1df1',1000,100,
 select public.print_issue_artwork_proof('36c57945-ea89-4a32-9f91-818377c50642');
 do $$begin
  begin perform public.print_invoice_accepted_quote('6da07f10-3ac0-49df-a3ee-64650a8e1df1'); raise exception 'TEST: unaccepted quote invoiced'; exception when others then if sqlerrm like 'TEST:%' then raise; end if; end;
- begin update public.print_proofs set status='approved' where order_id='6da07f10-3ac0-49df-a3ee-64650a8e1df1'; raise exception 'TEST: staff approved customer proof'; exception when others then if sqlerrm like 'TEST:%' then raise; end if; end;
+ begin perform public.respond_print_proof((select id from public.print_proofs where order_id='6da07f10-3ac0-49df-a3ee-64650a8e1df1' order by version desc limit 1),'approved',null); raise exception 'TEST: staff approved customer proof'; exception when others then if sqlerrm like 'TEST:%' then raise; end if; end;
 end $$;
 select set_config('request.jwt.claim.sub','70cc80e4-ecfe-42e9-b80e-6bc15e4691b6',true);
 do $$begin
@@ -27,7 +27,7 @@ do $$begin
  begin update public.print_quotes set total=1 where user_id=auth.uid(); raise exception 'TEST: customer changed quote total'; exception when others then if sqlerrm like 'TEST:%' then raise; end if; end;
 end $$;
 update public.print_quotes set status='accepted' where user_id=auth.uid();
-update public.print_proofs set status='approved' where order_id='6da07f10-3ac0-49df-a3ee-64650a8e1df1';
+select public.respond_print_proof(id,'approved',null) from public.print_proofs where order_id='6da07f10-3ac0-49df-a3ee-64650a8e1df1';
 select set_config('request.jwt.claim.sub','d690a16b-0091-4b8e-a22c-e5beedb4dced',true);
 select public.print_invoice_accepted_quote('6da07f10-3ac0-49df-a3ee-64650a8e1df1');
 do $$begin
